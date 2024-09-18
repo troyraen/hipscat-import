@@ -13,13 +13,18 @@ from upath import UPath
 from hipscat_import.runtime_arguments import RuntimeArguments
 
 
-@dataclass
-class VerificationArguments(RuntimeArguments):
+@dataclass(kw_only=True)
+class VerificationArguments:
     """Data class for holding verification arguments"""
 
+    ## Output
+    output_path: str | Path | UPath = field()
+    """Base path where verification reports should be written."""
+
     ## Input
-    input_catalog_path: str | Path | UPath | None = field(default=None)
+    input_catalog_path: str | Path | UPath = field()
     """Path to an existing catalog that will be inspected."""
+
     ## Verification options
     use_schema_file: str | None = field(default=None)
     """Path to a parquet file containing the expected schema.
@@ -31,9 +36,6 @@ class VerificationArguments(RuntimeArguments):
     field_distribution_cols: List[str] = field(default_factory=list)
     """List of fields to get the overall distribution for. e.g. ["ra", "dec"].
     Should be valid columns in the parquet files."""
-
-    def __post_init__(self):
-        super()._check_arguments()
 
     def additional_runtime_provenance_info(self) -> dict:
         return {
