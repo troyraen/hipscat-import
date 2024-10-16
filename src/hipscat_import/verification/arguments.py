@@ -2,46 +2,51 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional
 
-from hipscat.catalog import Catalog
-from hipscat.io.validation import is_valid_catalog
+import attrs
 from upath import UPath
 
-from hipscat_import.runtime_arguments import RuntimeArguments
+# from hipscat_import.runtime_arguments import RuntimeArguments
 
 
-@dataclass(kw_only=True)
+def _dir_exists(instance: VerificationArguments, attribute: attrs.Attribute, value: UPath):
+    """This function will be used as a validator for attributes of VerificationArguments."""
+    if not value.is_dir():
+        raise ValueError(f"{attribute.name} must be an existing directory")
+
+
+def _path_exists(instance: VerificationArguments, attribute: attrs.Attribute, value: UPath):
+    """This function will be used as a validator for attributes of VerificationArguments."""
+    if not value.exists():
+        raise ValueError(f"{attribute.name} must be an existing file or directory")
+
+
+@attrs.define(kw_only=True)
 class VerificationArguments:
-    """Data class for holding verification arguments"""
+    """Container for verification arguments."""
 
-    ## Output
-    output_path: str | Path | UPath = field()
-    """Base path where verification reports should be written."""
-
-    ## Input
-    input_catalog_path: str | Path | UPath = field()
-    """Path to an existing catalog that will be inspected."""
-
-    ## Verification options
-    use_schema_file: str | None = field(default=None)
-    """Path to a parquet file containing the expected schema.
-    Suggest to use the same value as when importing the catalog.
+    input_catalog_path: str | Path | UPath = attrs.field(converter=UPath, validator=_dir_exists)
+    """Path to an existing catalog that will be inspected. This must be a directory
+    containing the Parquet dataset and metadata sidecars."""
+    output_path: str | Path | UPath = attrs.field(converter=UPath)
+    """Base path where output files should be written."""
+    output_report_filename: str = attrs.field(factory=lambda: "verifier_results.csv")
+    """Filename for the verification report that will be generated."""
+    output_distributions_filename: str = attrs.field(factory=lambda: "field_distributions.csv")
+    """Filename for the field distributions that will be calculated."""
+    truth_total_rows: int | None = attrs.field(default=None)
+    """Total number of rows expected in this catalog."""
+    truth_schema: str | Path | UPath | None = attrs.field(
+        default=None,
+        converter=attrs.converters.optional(UPath),
+        validator=attrs.validators.optional(_path_exists),
+    )
+    """Path to a Parquet file or dataset containing the expected schema.
+    If you provided the 'use_schema_file' argument when importing the catalog, use the same value here.
     If not provided, the catalog's _common_metadata file will be used as the source of truth.
     """
-    expected_total_rows: int | None = field(default=None)
-    """Total number of rows expected in this catalog."""
-    field_distribution_cols: List[str] = field(default_factory=list)
-    """List of fields to get the overall distribution for. e.g. ["ra", "dec"].
-    Should be valid columns in the parquet files."""
 
+    # [FIXME] Connect this with RuntimeArguments.provenance_info. Even then, does this ever get written to file?
     def additional_runtime_provenance_info(self) -> dict:
-        return {
-            "pipeline": "verification pipeline",
-            "input_catalog_path": self.input_catalog_path,
-            "use_schema_file": self.use_schema_file,
-            "expected_total_rows": self.expected_total_rows,
-            "field_distribution_cols": self.field_distribution_cols,
-        }
+        return {"pipeline": "verification pipeline", **{k: str(v) for k, v in vars(self).items()}}
