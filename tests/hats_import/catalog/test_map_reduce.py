@@ -331,7 +331,7 @@ def test_reduce_order0(parquet_shards_dir, assert_parquet_file_ids, tmp_path):
     assert_parquet_file_ids(output_file, "id", expected_ids)
 
 
-def test_reduce_healpix_29_index(parquet_shards_dir, assert_parquet_file_ids, tmp_path):
+def test_reduce_healpix_29(parquet_shards_dir, assert_parquet_file_ids, tmp_path):
     """Test reducing with or without a _healpix_29 field"""
     (tmp_path / "reducing").mkdir(parents=True)
     mr.reduce_pixel_shards(
@@ -407,7 +407,7 @@ def test_reduce_with_sorting_complex(assert_parquet_file_ids, tmp_path):
 
     Logically, the input data has a mix of orderings in files, object IDs, and timestamps.
     Each source is partitioned according to the linked object's radec, and so will be
-    ordered within the same healpix_29 value.
+    ordered within the same spatial_index value.
 
     First, we take some time to set up these silly data points, then we test out
     reducing them into a single parquet file using a mix of reduction options.
@@ -443,7 +443,7 @@ def test_reduce_with_sorting_complex(assert_parquet_file_ids, tmp_path):
         lonlat=True,
         nest=True,
     )
-    ## Use this to prune generated columns like Norder, Npix, and healpix_29
+    ## Use this to prune generated columns like Norder, Npix, and _healpix_29
     comparison_columns = ["source_id", "object_id", "time", "ra", "dec"]
 
     ######################## Sort option 1: by source_id
@@ -465,7 +465,7 @@ def test_reduce_with_sorting_complex(assert_parquet_file_ids, tmp_path):
 
     ## sort order is effectively (norder19 healpix, source_id)
     data_frame = pd.read_parquet(output_file, engine="pyarrow")
-    expected_dataframe = combined_data.sort_values(["norder19_healpix", "source_id"])
+    expected_dataframe = combined_data.sort_values(["norder19_healpix", "source_id"], kind="stable")
     pd.testing.assert_frame_equal(
         expected_dataframe[comparison_columns].reset_index(drop=True),
         data_frame[comparison_columns].reset_index(drop=True),
@@ -501,7 +501,7 @@ def test_reduce_with_sorting_complex(assert_parquet_file_ids, tmp_path):
     )
 
     data_frame = pd.read_parquet(output_file, engine="pyarrow")
-    expected_dataframe = combined_data.sort_values(["norder19_healpix", "object_id", "time"])
+    expected_dataframe = combined_data.sort_values(["norder19_healpix", "object_id", "time"], kind="stable")
     pd.testing.assert_frame_equal(
         expected_dataframe[comparison_columns].reset_index(drop=True),
         data_frame[comparison_columns].reset_index(drop=True),
@@ -519,7 +519,7 @@ def test_reduce_with_sorting_complex(assert_parquet_file_ids, tmp_path):
         resort_ids=False,
     )
 
-    ######################## Sort option 3: by object id and time WITHOUT healpix_29
+    ######################## Sort option 3: by object id and time WITHOUT spatial index.
     ## The 1500 block of ids goes back to the end, because we're not using
     ## spatial properties for sorting, only numeric.
     ## sort order is effectively (object id, time)
@@ -539,7 +539,7 @@ def test_reduce_with_sorting_complex(assert_parquet_file_ids, tmp_path):
     )
 
     data_frame = pd.read_parquet(output_file, engine="pyarrow")
-    expected_dataframe = combined_data.sort_values(["object_id", "time"])
+    expected_dataframe = combined_data.sort_values(["object_id", "time"], kind="stable")
     pd.testing.assert_frame_equal(
         expected_dataframe[comparison_columns].reset_index(drop=True),
         data_frame[comparison_columns].reset_index(drop=True),
