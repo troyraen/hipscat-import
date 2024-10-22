@@ -185,3 +185,9 @@ def test_check_original_input_paths(tmp_path, mixed_schema_csv_dir):
     round_trip_files = plan.check_original_input_paths(checked_files)
 
     npt.assert_array_equal(checked_files, round_trip_files)
+
+
+def test_read_markers(test_data_dir):
+    plan = PipelineResumePlan(tmp_path=test_data_dir / "markers", progress_bar=False)
+    markers = plan.read_markers("mapping")
+    assert markers == {"map_001": ["45"], "map_002": ["zippy"]}

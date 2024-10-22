@@ -85,11 +85,45 @@ class PipelineResumePlan:
         """Touch (create) a done file for a single key, within a pipeline stage.
 
         Args:
-            stage_name(str): name of the stage (e.g. mapping, reducing)
+            tmp_path: where to write pipeline intermediate files
             stage_name(str): name of the stage (e.g. mapping, reducing)
             key (str): unique string for each task (e.g. "map_57")
         """
         Path(file_io.append_paths_to_pointer(tmp_path, stage_name, f"{key}_done")).touch()
+
+    @classmethod
+    def write_marker_file(cls, tmp_path, stage_name, key, value):
+        """Create a marker file for a single key, within a pipeline stage.
+
+        Similar to a "done" file, but contains some value inside the file to be read later.
+
+        Args:
+            tmp_path: where to write pipeline intermediate files
+            stage_name(str): name of the stage (e.g. mapping, reducing)
+            key (str): unique string for each task (e.g. "map_57")
+            value (str): value for the marker.
+        """
+        file_io.write_string_to_file(
+            file_io.append_paths_to_pointer(tmp_path, stage_name, f"{key}_done"), value
+        )
+
+    def read_markers(self, stage_name):
+        """Inspect the stage's directory of marker files, fetching the key value pairs
+        from marker file names and contents.
+
+        Args:
+            stage_name(str): name of the stage (e.g. mapping, reducing)
+        Return:
+            List[str] - all keys found in done directory
+        """
+        prefix = file_io.append_paths_to_pointer(self.tmp_path, stage_name)
+        result = {}
+        result_files = file_io.find_files_matching_path(prefix, "*_done")
+        for file_path in result_files:
+            match = re.match(r"(.*)_done", str(file_path.name))
+            key = match.group(1)
+            result[key] = file_io.load_text_file(file_path)
+        return result
 
     def read_done_keys(self, stage_name):
         """Inspect the stage's directory of done files, fetching the keys from done file names.
