@@ -11,11 +11,11 @@ import numpy.testing as npt
 import pandas as pd
 import pyarrow as pa
 import pytest
+from hats.pixel_math.sparse_histogram import SparseHistogram
 
 import hats_import.catalog.map_reduce as mr
 from hats_import.catalog.file_readers import get_file_reader
 from hats_import.catalog.resume_plan import ResumePlan
-from hats_import.catalog.sparse_histogram import SparseHistogram
 
 
 def pickle_file_reader(tmp_path, file_reader) -> str:

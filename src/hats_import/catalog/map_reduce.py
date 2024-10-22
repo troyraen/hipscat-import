@@ -10,11 +10,11 @@ import pyarrow.parquet as pq
 from hats import pixel_math
 from hats.io import file_io, paths
 from hats.pixel_math.healpix_pixel import HealpixPixel
+from hats.pixel_math.sparse_histogram import SparseHistogram
 from hats.pixel_math.spatial_index import SPATIAL_INDEX_COLUMN, spatial_index_to_healpix
 from upath import UPath
 
 from hats_import.catalog.resume_plan import ResumePlan
-from hats_import.catalog.sparse_histogram import SparseHistogram
 from hats_import.pipeline_resume_plan import get_pixel_cache_directory, print_task_failure
 
 # pylint: disable=too-many-locals,too-many-arguments

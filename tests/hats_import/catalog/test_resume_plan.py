@@ -3,9 +3,9 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
+from hats.pixel_math.sparse_histogram import SparseHistogram
 
 from hats_import.catalog.resume_plan import ResumePlan
-from hats_import.catalog.sparse_histogram import SparseHistogram
 
 
 def test_done_checks(tmp_path):

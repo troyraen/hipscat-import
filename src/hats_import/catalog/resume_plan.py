@@ -12,10 +12,10 @@ from hats import pixel_math
 from hats.io import file_io
 from hats.pixel_math import empty_histogram
 from hats.pixel_math.healpix_pixel import HealpixPixel
+from hats.pixel_math.sparse_histogram import SparseHistogram
 from numpy import frombuffer
 from upath import UPath
 
-from hats_import.catalog.sparse_histogram import SparseHistogram
 from hats_import.pipeline_resume_plan import PipelineResumePlan
 
 
