@@ -107,14 +107,14 @@ class PipelineResumePlan:
             file_io.append_paths_to_pointer(tmp_path, stage_name, f"{key}_done"), value
         )
 
-    def read_markers(self, stage_name):
+    def read_markers(self, stage_name: str) -> list[str]:
         """Inspect the stage's directory of marker files, fetching the key value pairs
         from marker file names and contents.
 
         Args:
             stage_name(str): name of the stage (e.g. mapping, reducing)
         Return:
-            List[str] - all keys found in done directory
+            list[str] - all keys found in done directory
         """
         prefix = file_io.append_paths_to_pointer(self.tmp_path, stage_name)
         result = {}

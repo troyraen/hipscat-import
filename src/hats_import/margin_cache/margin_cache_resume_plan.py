@@ -182,7 +182,7 @@ def _find_partition_margin_pixel_pairs(combined_pixels, margin_order):
     return margin_pairs_df
 
 
-def _marker_value_to_int(marker_value: List[str]) -> int:
+def _marker_value_to_int(marker_value: list[str]) -> int:
     """Convenience method to parse the contents of a marker file."""
     if len(marker_value) != 1:
         raise ValueError("Marker file should contain only one integer value.")
