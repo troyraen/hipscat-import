@@ -107,7 +107,7 @@ class PipelineResumePlan:
             file_io.append_paths_to_pointer(tmp_path, stage_name, f"{key}_done"), value
         )
 
-    def read_markers(self, stage_name: str) -> list[str]:
+    def read_markers(self, stage_name: str) -> dict[str, list[str]]:
         """Inspect the stage's directory of marker files, fetching the key value pairs
         from marker file names and contents.
 
@@ -121,6 +121,8 @@ class PipelineResumePlan:
         result_files = file_io.find_files_matching_path(prefix, "*_done")
         for file_path in result_files:
             match = re.match(r"(.*)_done", str(file_path.name))
+            if not match:
+                raise ValueError(f"Unexpected file found: {file_path.name}")
             key = match.group(1)
             result[key] = file_io.load_text_file(file_path)
         return result
