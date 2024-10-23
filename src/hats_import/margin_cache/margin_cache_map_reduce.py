@@ -55,12 +55,13 @@ def map_pixel_shards(
         # For every possible output pixel, find the full margin_order pixel filter list,
         # perform the filter, and pass along to helper method to compute fine filter
         # and write out shard file.
+        num_rows = 0
         for partition_key, data_filter in margin_pixel_filter.groupby(["partition_order", "partition_pixel"]):
             data_filter = np.unique(data_filter["filter_value"]).tolist()
             pixel = HealpixPixel(partition_key[0], partition_key[1])
 
             filtered_data = data.iloc[data_filter]
-            _to_pixel_shard(
+            num_rows += _to_pixel_shard(
                 filtered_data=filtered_data,
                 pixel=pixel,
                 margin_threshold=margin_threshold,
@@ -71,7 +72,7 @@ def map_pixel_shards(
                 fine_filtering=fine_filtering,
             )
 
-        MarginCachePlan.mapping_key_done(output_path, mapping_key)
+        MarginCachePlan.mapping_key_done(output_path, mapping_key, num_rows)
     except Exception as exception:  # pylint: disable=broad-exception-caught
         print_task_failure(f"Failed MAPPING stage for pixel: {mapping_key}", exception)
         raise exception
@@ -101,7 +102,8 @@ def _to_pixel_shard(
     else:
         margin_data = filtered_data
 
-    if len(margin_data):
+    num_rows = len(margin_data)
+    if num_rows:
         # generate a file name for our margin shard, that uses both sets of Norder/Npix
         partition_dir = get_pixel_cache_directory(output_path, pixel)
         shard_dir = paths.pixel_directory(partition_dir, source_pixel.order, source_pixel.pixel)
@@ -132,6 +134,7 @@ def _to_pixel_shard(
         margin_data = margin_data.sort_index()
 
         margin_data.to_parquet(shard_path.path, filesystem=shard_path.fs)
+    return num_rows
 
 
 def reduce_margin_shards(

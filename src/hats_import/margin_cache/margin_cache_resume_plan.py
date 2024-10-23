@@ -25,6 +25,7 @@ class MarginCachePlan(PipelineResumePlan):
     MAPPING_STAGE = "mapping"
     REDUCING_STAGE = "reducing"
     MARGIN_PAIR_FILE = "margin_pair.csv"
+    MAPPING_TOTAL_FILE = "mapping_total"
 
     def __init__(self, args: MarginCacheArguments):
         if not args.tmp_path:  # pragma: no cover (not reachable, but required for mypy)
@@ -64,14 +65,14 @@ class MarginCachePlan(PipelineResumePlan):
             step_progress.update(1)
 
     @classmethod
-    def mapping_key_done(cls, tmp_path, mapping_key: str):
+    def mapping_key_done(cls, tmp_path, mapping_key: str, num_rows: int):
         """Mark a single mapping task as done
 
         Args:
             tmp_path (str): where to write intermediate resume files.
             mapping_key (str): unique string for each mapping task (e.g. "map_1_24")
         """
-        cls.touch_key_done_file(tmp_path, cls.MAPPING_STAGE, mapping_key)
+        cls.write_marker_file(tmp_path, cls.MAPPING_STAGE, mapping_key, str(num_rows))
 
     def wait_for_mapping(self, futures):
         """Wait for mapping stage futures to complete."""
@@ -86,6 +87,22 @@ class MarginCachePlan(PipelineResumePlan):
     def is_mapping_done(self) -> bool:
         """Are there sources left to count?"""
         return self.done_file_exists(self.MAPPING_STAGE)
+
+    def get_mapping_total(self) -> int:
+        """Find the total number of rows, based on the intermediate markers."""
+        if not self.is_mapping_done():
+            raise ValueError("mapping stage is not done yet.")
+
+        total_marker_file = file_io.append_paths_to_pointer(self.tmp_path, self.MAPPING_TOTAL_FILE)
+
+        if file_io.does_file_or_directory_exist(total_marker_file):
+            marker_value = file_io.load_text_file(total_marker_file)
+            return _marker_value_to_int(marker_value)
+
+        markers = self.read_markers(self.MAPPING_STAGE)
+        total_marker_value = sum(_marker_value_to_int(value) for value in markers.values())
+        file_io.write_string_to_file(total_marker_file, str(total_marker_value))
+        return total_marker_value
 
     def get_remaining_map_keys(self):
         """Fetch a tuple for each pixel/partition left to map."""
@@ -163,3 +180,10 @@ def _find_partition_margin_pixel_pairs(combined_pixels, margin_order):
         columns=["partition_order", "partition_pixel", "margin_pixel"],
     ).sort_values("margin_pixel")
     return margin_pairs_df
+
+
+def _marker_value_to_int(marker_value: list[str]) -> int:
+    """Convenience method to parse the contents of a marker file."""
+    if len(marker_value) != 1:
+        raise ValueError("Marker file should contain only one integer value.")
+    return int(marker_value[0])

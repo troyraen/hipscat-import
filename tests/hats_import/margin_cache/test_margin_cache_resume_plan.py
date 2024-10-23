@@ -99,6 +99,25 @@ def test_some_reducing_task_failures(small_sky_margin_args, dask_client):
     plan.wait_for_reducing(futures)
 
 
+def test_mapping_total(small_sky_margin_args):
+    plan = MarginCachePlan(small_sky_margin_args)
+
+    MarginCachePlan.mapping_key_done(plan.tmp_path, "map_001", 45)
+    MarginCachePlan.mapping_key_done(plan.tmp_path, "map_002", 9)
+    plan.touch_stage_done_file(MarginCachePlan.MAPPING_STAGE)
+
+    markers = plan.read_markers("mapping")
+    assert markers == {"map_001": ["45"], "map_002": ["9"]}
+
+    mapping_total = plan.get_mapping_total()
+    assert mapping_total == 54
+
+    # We'll just return the previously-computed total
+    MarginCachePlan.mapping_key_done(plan.tmp_path, "map_002", 10)
+    mapping_total = plan.get_mapping_total()
+    assert mapping_total == 54
+
+
 def test_partition_margin_pixel_pairs(small_sky_source_catalog):
     """Ensure partition_margin_pixel_pairs can generate main partition pixels."""
     source_catalog = Catalog.read_hats(small_sky_source_catalog)

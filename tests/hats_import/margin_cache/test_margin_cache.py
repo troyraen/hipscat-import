@@ -97,3 +97,19 @@ def test_margin_cache_gen_negative_pixels(small_sky_source_catalog, tmp_path, da
     negative_data = pd.read_parquet(negative_test_file)
 
     assert len(negative_data) > 0
+
+
+@pytest.mark.dask(timeout=150)
+def test_margin_too_small(small_sky_object_catalog, tmp_path, dask_client):
+    """Test that margin cache generation works end to end."""
+    args = MarginCacheArguments(
+        margin_threshold=10.0,
+        input_catalog_path=small_sky_object_catalog,
+        output_path=tmp_path,
+        output_artifact_name="catalog_cache",
+        margin_order=8,
+        progress_bar=False,
+    )
+
+    with pytest.raises(ValueError, match="Margin cache contains no rows"):
+        mc.generate_margin_cache(args, dask_client)

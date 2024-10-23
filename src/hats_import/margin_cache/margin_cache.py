@@ -39,6 +39,11 @@ def generate_margin_cache(args, client):
             )
         resume_plan.wait_for_mapping(futures)
 
+    with resume_plan.print_progress(total=1, stage_name="Binning") as step_progress:
+        total_rows = resume_plan.get_mapping_total()
+        if not total_rows:
+            raise ValueError("Margin cache contains no rows. Increase margin size and re-run.")
+
     if not resume_plan.is_reducing_done():
         futures = []
         for reducing_key, pix in resume_plan.get_remaining_reduce_keys():
@@ -57,7 +62,11 @@ def generate_margin_cache(args, client):
         resume_plan.wait_for_reducing(futures)
 
     with resume_plan.print_progress(total=4, stage_name="Finishing") as step_progress:
-        total_rows = parquet_metadata.write_parquet_metadata(args.catalog_path)
+        metadata_total_rows = parquet_metadata.write_parquet_metadata(args.catalog_path)
+        if metadata_total_rows != total_rows:
+            raise ValueError(
+                f"Wrote unexpected number of rows ({total_rows} expected, {metadata_total_rows} written)"
+            )
         step_progress.update(1)
         metadata_path = paths.get_parquet_metadata_pointer(args.catalog_path)
         partition_info = PartitionInfo.read_from_file(metadata_path)
