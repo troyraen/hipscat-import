@@ -3,7 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from hats.catalog import Catalog, TableProperties
+from hats import read_hats
+from hats.catalog import TableProperties
 from hats.catalog.catalog_type import CatalogType
 from hats.io.validation import is_valid_catalog
 from upath import UPath
@@ -42,7 +43,7 @@ class SoapArguments(RuntimeArguments):
         if not is_valid_catalog(self.object_catalog_dir):
             raise ValueError("object_catalog_dir not a valid catalog")
 
-        self.object_catalog = Catalog.read_hats(catalog_path=self.object_catalog_dir)
+        self.object_catalog = read_hats(catalog_path=self.object_catalog_dir)
 
         if not self.source_catalog_dir:
             raise ValueError("source_catalog_dir is required")
@@ -51,7 +52,7 @@ class SoapArguments(RuntimeArguments):
         if not is_valid_catalog(self.source_catalog_dir):
             raise ValueError("source_catalog_dir not a valid catalog")
 
-        self.source_catalog = Catalog.read_hats(catalog_path=self.source_catalog_dir)
+        self.source_catalog = read_hats(catalog_path=self.source_catalog_dir)
 
         if self.compute_partition_size < 100_000:
             raise ValueError("compute_partition_size must be at least 100_000")

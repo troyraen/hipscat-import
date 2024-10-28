@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional
 
+from hats import read_hats
 from hats.catalog import Catalog
 from hats.io.validation import is_valid_catalog
 from upath import UPath
@@ -39,6 +40,6 @@ class VerificationArguments(RuntimeArguments):
         if not self.input_catalog:
             if not is_valid_catalog(self.input_catalog_path):
                 raise ValueError("input_catalog_path not a valid catalog")
-            self.input_catalog = Catalog.read_hats(catalog_path=self.input_catalog_path)
+            self.input_catalog = read_hats(catalog_path=self.input_catalog_path)
         if not self.input_catalog_path:
             self.input_catalog_path = self.input_catalog.catalog_path

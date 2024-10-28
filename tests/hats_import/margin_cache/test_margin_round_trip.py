@@ -5,8 +5,7 @@ import os
 
 import pandas as pd
 import pytest
-from hats.catalog.catalog import Catalog
-from hats.catalog.healpix_dataset.healpix_dataset import HealpixDataset
+from hats import read_hats
 from hats.io import paths
 from hats.pixel_math.healpix_pixel import HealpixPixel
 
@@ -49,7 +48,7 @@ def test_margin_import_gaia_minimum(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    Catalog.read_hats(args.catalog_path)
+    read_hats(args.catalog_path)
 
     args = MarginCacheArguments(
         margin_threshold=180.0,
@@ -61,7 +60,7 @@ def test_margin_import_gaia_minimum(
     )
 
     mc.generate_margin_cache(args, dask_client)
-    catalog = HealpixDataset.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert len(catalog.get_healpix_pixels()) == 1
@@ -102,7 +101,7 @@ def test_margin_import_mixed_schema_csv(
         progress_bar=False,
     )
     runner.run(args, dask_client)
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert len(catalog.get_healpix_pixels()) == 8
 
     args = MarginCacheArguments(
@@ -115,7 +114,7 @@ def test_margin_import_mixed_schema_csv(
     )
 
     mc.generate_margin_cache(args, dask_client)
-    catalog = HealpixDataset.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert len(catalog.get_healpix_pixels()) == 5

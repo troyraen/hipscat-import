@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 
 import pytest
+from hats import read_hats
 from hats.catalog import Catalog, TableProperties
 from hats.pixel_math.healpix_pixel import HealpixPixel
 
@@ -12,8 +13,8 @@ from hats_import.soap.resume_plan import SoapPlan, source_to_object_map
 
 def test_source_to_object_map(small_sky_object_catalog, small_sky_source_catalog, small_sky_soap_maps):
     """Test creating plan map for object and source catalogs."""
-    object_catalog = Catalog.read_hats(small_sky_object_catalog)
-    source_catalog = Catalog.read_hats(small_sky_source_catalog)
+    object_catalog = read_hats(small_sky_object_catalog)
+    source_catalog = read_hats(small_sky_source_catalog)
 
     source_to_object = source_to_object_map(object_catalog, source_catalog)
     assert source_to_object == small_sky_soap_maps
@@ -40,8 +41,8 @@ def test_object_to_source_map(small_sky_object_catalog, small_sky_source_catalog
         ]
     }
     ## Oh, we're so silly!
-    object_catalog = Catalog.read_hats(small_sky_source_catalog)
-    source_catalog = Catalog.read_hats(small_sky_object_catalog)
+    object_catalog = read_hats(small_sky_source_catalog)
+    source_catalog = read_hats(small_sky_object_catalog)
 
     source_to_object = source_to_object_map(object_catalog, source_catalog)
     assert source_to_object == expected

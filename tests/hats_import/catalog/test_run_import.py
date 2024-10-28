@@ -9,7 +9,7 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
-from hats.catalog.catalog import Catalog
+from hats import read_hats
 from hats.pixel_math.sparse_histogram import SparseHistogram
 
 import hats_import.catalog.run_import as runner
@@ -79,7 +79,7 @@ def test_resume_dask_runner(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert catalog.catalog_info.ra_column == "ra"
@@ -111,7 +111,7 @@ def test_resume_dask_runner(
 
     runner.run(args, dask_client)
 
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert catalog.catalog_info.ra_column == "ra"
@@ -177,7 +177,7 @@ def test_resume_dask_runner_diff_pixel_order(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert catalog.catalog_info.ra_column == "ra"
@@ -261,7 +261,7 @@ def test_dask_runner(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert catalog.catalog_info.ra_column == "ra"
@@ -337,7 +337,7 @@ def test_dask_runner_stats_only(dask_client, small_sky_parts_dir, tmp_path):
 
     assert not os.path.exists(output_file)
 
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert catalog.catalog_info.ra_column == "ra"

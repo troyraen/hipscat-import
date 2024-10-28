@@ -4,7 +4,7 @@ import numpy as np
 import numpy.testing as npt
 import pandas as pd
 import pytest
-from hats.catalog.healpix_dataset.healpix_dataset import HealpixDataset
+from hats import read_hats
 from hats.io import paths
 from hats.pixel_math.healpix_pixel import HealpixPixel
 
@@ -67,7 +67,7 @@ def test_margin_cache_gen(small_sky_source_catalog, tmp_path, dask_client):
         ],
     )
 
-    catalog = HealpixDataset.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
 

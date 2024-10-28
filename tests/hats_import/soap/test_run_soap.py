@@ -5,7 +5,7 @@ import os
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
-from hats.catalog.association_catalog.association_catalog import AssociationCatalog
+from hats import read_hats
 
 import hats_import.soap.run_soap as runner
 from hats_import.soap.arguments import SoapArguments
@@ -30,7 +30,7 @@ def test_object_to_source(dask_client, small_sky_soap_args):
     runner.run(small_sky_soap_args, dask_client)
 
     ## Check that the association data can be parsed as a valid association catalog.
-    catalog = AssociationCatalog.read_hats(small_sky_soap_args.catalog_path)
+    catalog = read_hats(small_sky_soap_args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == small_sky_soap_args.catalog_path
     assert len(catalog.get_join_pixels()) == 14
@@ -54,7 +54,7 @@ def test_object_to_self(dask_client, tmp_path, small_sky_object_catalog):
     runner.run(small_sky_soap_args, dask_client)
 
     ## Check that the association data can be parsed as a valid association catalog.
-    catalog = AssociationCatalog.read_hats(small_sky_soap_args.catalog_path)
+    catalog = read_hats(small_sky_soap_args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == small_sky_soap_args.catalog_path
     assert len(catalog.get_join_pixels()) == 1
@@ -81,7 +81,7 @@ def test_object_to_source_with_leaves(
     runner.run(small_sky_soap_args, dask_client)
 
     ## Check that the association data can be parsed as a valid association catalog.
-    catalog = AssociationCatalog.read_hats(small_sky_soap_args.catalog_path)
+    catalog = read_hats(small_sky_soap_args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == small_sky_soap_args.catalog_path
     assert len(catalog.get_join_pixels()) == 14
@@ -132,7 +132,7 @@ def test_object_to_source_with_leaves_drop_duplicates(
     runner.run(small_sky_soap_args, dask_client)
 
     ## Check that the association data can be parsed as a valid association catalog.
-    catalog = AssociationCatalog.read_hats(small_sky_soap_args.catalog_path)
+    catalog = read_hats(small_sky_soap_args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == small_sky_soap_args.catalog_path
     assert len(catalog.get_join_pixels()) == 14
