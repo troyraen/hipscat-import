@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from hats.catalog import Catalog
+from hats import read_hats
 
 from hats_import.margin_cache.margin_cache_arguments import MarginCacheArguments
 from hats_import.margin_cache.margin_cache_resume_plan import (
@@ -120,7 +120,7 @@ def test_mapping_total(small_sky_margin_args):
 
 def test_partition_margin_pixel_pairs(small_sky_source_catalog):
     """Ensure partition_margin_pixel_pairs can generate main partition pixels."""
-    source_catalog = Catalog.read_hats(small_sky_source_catalog)
+    source_catalog = read_hats(small_sky_source_catalog)
     margin_pairs = _find_partition_margin_pixel_pairs(source_catalog.get_healpix_pixels(), 3)
 
     expected = np.array([0, 2, 8, 10, 32, 34, 40, 42, 192, 192])
@@ -131,7 +131,7 @@ def test_partition_margin_pixel_pairs(small_sky_source_catalog):
 
 def test_partition_margin_pixel_pairs_negative(small_sky_source_catalog):
     """Ensure partition_margin_pixel_pairs can generate negative tree pixels."""
-    source_catalog = Catalog.read_hats(small_sky_source_catalog)
+    source_catalog = read_hats(small_sky_source_catalog)
 
     partition_stats = source_catalog.get_healpix_pixels()
     negative_pixels = source_catalog.generate_negative_tree_pixels()

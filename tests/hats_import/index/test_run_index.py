@@ -4,7 +4,7 @@ import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
-from hats.catalog.dataset.dataset import Dataset
+from hats import read_hats
 
 import hats_import.index.run_index as runner
 from hats_import.index.arguments import IndexArguments
@@ -41,7 +41,7 @@ def test_run_index(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Dataset.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
 
@@ -85,7 +85,7 @@ def test_run_index_on_source(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Dataset.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert catalog.catalog_info.extra_columns == ["mag", "band"]
@@ -133,7 +133,7 @@ def test_run_index_on_source_object_id(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Dataset.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
 

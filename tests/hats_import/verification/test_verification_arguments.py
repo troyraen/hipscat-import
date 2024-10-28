@@ -1,7 +1,7 @@
 """Tests of argument validation"""
 
 import pytest
-from hats.catalog import Catalog
+from hats import read_hats
 
 from hats_import.verification.arguments import VerificationArguments
 
@@ -59,7 +59,7 @@ def test_catalog_object(tmp_path, small_sky_object_catalog):
 
     NB: This is currently the last test in alpha-order, and may require additional
     time to teardown fixtures."""
-    small_sky_catalog_object = Catalog.read_hats(catalog_path=small_sky_object_catalog)
+    small_sky_catalog_object = read_hats(catalog_path=small_sky_object_catalog)
     tmp_path_str = str(tmp_path)
     args = VerificationArguments(
         input_catalog=small_sky_catalog_object,

@@ -7,6 +7,7 @@ from typing import List, Optional, Tuple
 
 import hats.pixel_math.healpix_shim as hp
 import numpy as np
+from hats import read_hats
 from hats.catalog import Catalog
 from hats.io import file_io
 from hats.pixel_math.healpix_pixel import HealpixPixel
@@ -51,12 +52,12 @@ class SoapPlan(PipelineResumePlan):
                 return
             step_progress.update(1)
 
-            self.object_catalog = Catalog.read_hats(args.object_catalog_dir)
+            self.object_catalog = read_hats(args.object_catalog_dir)
             source_map_file = file_io.append_paths_to_pointer(self.tmp_path, self.SOURCE_MAP_FILE)
             if file_io.does_file_or_directory_exist(source_map_file):
                 source_pixel_map = np.load(source_map_file, allow_pickle=True)["arr_0"].item()
             else:
-                source_catalog = Catalog.read_hats(args.source_catalog_dir)
+                source_catalog = read_hats(args.source_catalog_dir)
                 source_pixel_map = source_to_object_map(self.object_catalog, source_catalog)
                 np.savez_compressed(source_map_file, source_pixel_map)
             self.count_keys = self.get_sources_to_count(source_pixel_map=source_pixel_map)

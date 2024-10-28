@@ -15,7 +15,7 @@ import pyarrow as pa
 import pyarrow.dataset as pds
 import pyarrow.parquet as pq
 import pytest
-from hats.catalog.catalog import Catalog
+from hats import read_hats
 from hats.pixel_math.spatial_index import spatial_index_to_healpix
 from pyarrow import csv
 
@@ -52,7 +52,7 @@ def test_import_source_table(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert catalog.catalog_info.ra_column == "source_ra"
@@ -226,7 +226,7 @@ def test_import_constant_healpix_order(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     # Check that the partition info file exists - all pixels at order 2!
@@ -267,7 +267,7 @@ def test_import_keep_intermediate_files(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
 
@@ -421,7 +421,7 @@ def test_import_lowest_healpix_order(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     # Check that the partition info file exists - all pixels at order 2!
@@ -472,7 +472,7 @@ def test_import_starr_file(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert catalog.catalog_info.total_rows == 131
@@ -522,7 +522,7 @@ def test_import_pyarrow_types(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert catalog.catalog_info.total_rows == 131
@@ -584,7 +584,7 @@ def test_import_healpix_29_pyarrow_table_csv(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert catalog.catalog_info.total_rows == 131
@@ -627,7 +627,7 @@ def test_import_healpix_29_pyarrow_table_parquet(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert catalog.catalog_info.total_rows == 131
@@ -681,7 +681,7 @@ def test_import_healpix_29(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert catalog.catalog_info.total_rows == 131
@@ -723,7 +723,7 @@ def test_import_healpix_29_no_pandas(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert catalog.catalog_info.total_rows == 131
@@ -772,7 +772,7 @@ def test_import_gaia_minimum(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert catalog.catalog_info.total_rows == 5
@@ -818,7 +818,7 @@ def test_gaia_ecsv(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert catalog.catalog_info.total_rows == 3
@@ -937,7 +937,7 @@ def test_import_indexed_csv(
     runner.run(args, dask_client)
 
     # Check that the catalog metadata file exists
-    catalog = Catalog.read_hats(args.catalog_path)
+    catalog = read_hats(args.catalog_path)
     assert catalog.on_disk
     assert catalog.catalog_path == args.catalog_path
     assert len(catalog.get_healpix_pixels()) == 1

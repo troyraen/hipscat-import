@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import List
 
 import hats.pixel_math.healpix_shim as hp
-from hats.catalog import Catalog, TableProperties
+from hats import read_hats
+from hats.catalog import TableProperties
 from hats.io.validation import is_valid_catalog
 from hats.pixel_math.healpix_pixel import HealpixPixel
 from upath import UPath
@@ -47,7 +48,7 @@ class MarginCacheArguments(RuntimeArguments):
         if not is_valid_catalog(self.input_catalog_path):
             raise ValueError("input_catalog_path not a valid catalog")
 
-        self.catalog = Catalog.read_hats(self.input_catalog_path)
+        self.catalog = read_hats(self.input_catalog_path)
         if len(self.debug_filter_pixel_list) > 0:
             self.catalog = self.catalog.filter_from_pixel_list(self.debug_filter_pixel_list)
             if len(self.catalog.get_healpix_pixels()) == 0:
