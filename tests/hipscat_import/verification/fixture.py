@@ -11,7 +11,7 @@ from hipscat_import.verification.run_verification import Verifier
 
 @attrs.define
 class VerifierFixture:
-    """Class for pytest fixtures for verification tests. Instantiate using the 'from_param' method."""
+    """Class to generate pytest fixtures for verification tests. Instantiate using the 'from_param' method."""
 
     test_targets: dict[str, list | dict] = attrs.field(validator=attrs.validators.instance_of(dict))
     """Dictionary mapping test names to targets."""
@@ -47,6 +47,7 @@ class VerifierFixture:
         truth_schema = fixture_def.get("truth_schema")
         if truth_schema is not None:
             truth_schema = malformed_catalog_dirs[truth_schema.split("/")[0]] / truth_schema.split("/")[1]
+
         args = VerificationArguments(
             input_catalog_path=malformed_catalog_dirs[fixture_def["input_dir"]],
             output_path=tmp_path,

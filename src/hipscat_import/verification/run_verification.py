@@ -13,7 +13,7 @@ from hipscat_import.verification.arguments import VerificationArguments
 
 
 def run(args: VerificationArguments, write_mode: str = "a"):
-    """Create a Verifier using args, run all tests, and write reports.
+    """Create a `Verifier` using `args`, run all tests, and write reports.
 
     Parameters
     ----------
@@ -25,12 +25,13 @@ def run(args: VerificationArguments, write_mode: str = "a"):
     Returns
     -------
     Verifier
-        An instance of the Verifier class after running the verification process.
+        The `Verifier` instance used to perform the tests. The `results_df` and
+        `distributions_df` properties contain the same information as written reports.
 
     Raises
     ------
     TypeError
-        If 'args' is not provided or is not an instance of VerificationArguments.
+        If `args` is not provided or is not an instance of `VerificationArguments`.
     """
     if not args:
         raise TypeError("args is required and should be type VerificationArguments")
@@ -56,7 +57,7 @@ def now():
 
 @attrs.define
 class Verifier:
-    """Class for verification tests. Instantiate using the 'from_args' method."""
+    """Class for verification tests. Instantiate using the `from_args` method."""
 
     args: VerificationArguments = attrs.field()
     """Arguments to use during verification."""
@@ -78,19 +79,19 @@ class Verifier:
 
     @classmethod
     def from_args(cls, args: VerificationArguments) -> "Verifier":
-        """Create a Verifier instance from the provided arguments.
+        """Create a `Verifier` instance from the provided arguments.
 
-        This method initializes the Verifier by setting up the necessary datasets
+        This method initializes the `Verifier` by setting up the necessary datasets
         and schemas based on the input arguments.
 
         Parameters
         ----------
-            args : VerificationArguments:
+            args : VerificationArguments
                 Arguments for the Verifier.
 
         Returns
         -------
-            Verifier: An instance of the Verifier class.
+            Verifier : An instance of the `Verifier` class.
         """
         # make sure the output directory exists
         args.output_path.mkdir(exist_ok=True, parents=True)
@@ -131,10 +132,10 @@ class Verifier:
             truth_src=truth_src,
         )
 
-    def run(self, write_mode: str = "a"):
+    def run(self, write_mode: str = "a") -> None:
         """Run all tests and write reports."""
-        self.test_file_sets()
         self.test_is_valid_catalog()
+        self.test_file_sets()
         self.test_num_rows()
         self.test_rowgroup_stats(write_mode=write_mode)
         self.test_schemas()
@@ -147,7 +148,7 @@ class Verifier:
         return pd.DataFrame(self.results)
 
     def truth_schema_plus_common_metadata(self) -> pyarrow.Schema:
-        """Copy of truth_schema with hipscat fields and metadata added from common_ds.schema."""
+        """Copy of `truth_schema` with hipscat fields and metadata added from `common_ds.schema`."""
         hipscat_cols = ["Norder", "Dir", "Npix", "_hipscat_index"]
         new_fields = [
             self.common_ds.schema.field(fld) for fld in hipscat_cols if fld not in self.truth_schema.names
@@ -160,7 +161,10 @@ class Verifier:
         return pyarrow.schema(list(self.truth_schema) + new_fields).with_metadata(metadata)
 
     def test_file_sets(self) -> bool:
-        """Test that files in _metadata match files on disk. Add one Result to results.
+        """Test that files in _metadata match the parquet files on disk. Add one `Result` to `results`.
+
+        This is a simple test that can be especially useful to run after copying or moving
+        the catalog to a different local or cloud-based destination.
 
         Returns
         -------
@@ -183,7 +187,7 @@ class Verifier:
         return passed
 
     def test_is_valid_catalog(self) -> bool:
-        """Test if the provided catalog is a valid HiPSCat catalog. Add one Result to results.
+        """Test if the provided catalog is a valid HiPSCat catalog. Add one `Result` to `results`.
 
         Returns
         -------
@@ -201,7 +205,7 @@ class Verifier:
         return passed
 
     def test_num_rows(self) -> bool:
-        """Test the number of rows in the dataset. Add two Results to results.
+        """Test the number of rows in the dataset. Add two `Results` to `results`.
 
         File footers are compared with _metadata and the user-supplied truth (if provided).
 
@@ -268,9 +272,9 @@ class Verifier:
         return nrows_df
 
     def test_rowgroup_stats(self, *, write_mode: str = "a") -> bool:
-        """Test that statistics were recorded for all row groups. Add a Result to results.
+        """Test that statistics were recorded for all row groups. Add a `Result` to `results`.
 
-        If the test passes, distributions_df is written to file.
+        If the test passes, `distributions_df` is written to file.
 
         Parameters
         ----------
@@ -350,13 +354,13 @@ class Verifier:
         return self._distributions_df
 
     def test_schemas(self) -> bool:
-        """Test the equality of schemas and their metadata. Add Results to results.
+        """Test the equality of schemas and their metadata. Add `Result`s to `results`.
 
         This method performs up to four tests:
         1. Schema metadata includes a correct pandas schema.
-        2. _common_metadata matches user-supplied truth_schema (schema and metadata), if provided.
-        3. _metadata matches Verifier truth_schema (schema and metadata).
-        4. File footers match Verifier truth_schema (schema and metadata).
+        2. _common_metadata matches user-supplied `args.truth_schema` (schema and metadata), if provided.
+        3. _metadata matches Verifier `truth_schema` (schema and metadata).
+        4. File footers match Verifier `truth_schema` (schema and metadata).
 
         Returns
         -------
@@ -380,7 +384,7 @@ class Verifier:
 
         This method performs up to two tests:
         1. Schema metadata includes a correct pandas schema.
-        2. _common_metadata matches user-supplied truth_schema (schema and metadata), if provided.
+        2. _common_metadata matches user-supplied `args.truth_schema` (schema and metadata), if provided.
 
         Parameters
         ----------
@@ -413,7 +417,8 @@ class Verifier:
         return all([pandas_passed, passed, passedmd])
 
     def _test_schema__common_metadata_pandas(self) -> bool:
-        """Test that the pandas schema in _common_metadata metadata matches the truth schema.
+        """Test that the pandas metadata in _common_metadata matches the actual field names
+        and types in `truth_schema`.
 
         Returns
         -------
@@ -507,7 +512,7 @@ class Verifier:
         passed: bool,
         affected_files: list[str] | None = None,
     ):
-        """Create a Result and append it to self.results."""
+        """Create a `Result` and append it to `self.results`."""
         self.results.append(
             Result(
                 datetime=now(),
